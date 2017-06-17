@@ -1,0 +1,9 @@
+Edit the start.sh BOSS variable to point to the folder with SDSS data and then start the LFDA by invoking it. 
+Edit the FITSDMP to point to a folder where you want to dump your unpacked fits. All of them will be deleted as you exit the LFDA.
+
+
+Required:
+
+python 2.7
+OpenCV 2.4.9
+NumPy 1.12.1
