@@ -1,0 +1,6 @@
+w_camcol = 2048
+w_camcol_spacing = 1743.820956
+h_filter = 2048
+h_filter_spacing = 660.4435401
+arcmin2pix = 0.0066015625
+mm2arcmin = 3.63535503

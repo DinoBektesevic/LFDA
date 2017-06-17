@@ -1,0 +1,26 @@
+from detecttrails.sdss import files #possible change to import sdss necessary 
+import fitsio
+
+def getRuns():
+        """
+        Reads runlist.par file and returns a list of all runs.
+        """
+        rl = files.runlist()
+        runs = rl["run"]
+        if runs is None:
+            raise ValueError("Unable to retrieve runs. Retrieved NoneType.")
+        return runs
+
+def runInfo():
+    """
+    Reads runlist.par file and extracts startfield and endfield
+    of a run. Runs are gotten from self._run attribute of instance
+    """
+    rl = files.runlist()
+    w, = _np.where(rl['run'] == self._run)
+    if len(w) == 0:
+        raise ValueError("Run %s not found in runList.par" % self._run)
+    startfield = rl[w]['startfield'][0]
+    endfield = rl[w]['endfield'][0]
+    return startfield, endfield
+

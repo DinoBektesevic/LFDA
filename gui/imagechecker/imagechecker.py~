@@ -1,0 +1,147 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+from .leftframe import LeftFrame
+from .rightframe import RightFrame
+from gui.utils import utils
+from results import Results
+
+import ttk
+from Tkinter import *
+from ttk import *
+from Tkinter import Label
+import tkFileDialog
+
+import os
+
+class Data(object):
+    def __init__(self, respath=None, imgpath=None):
+        self.current = None
+        self.maxindex = None
+        self.results = None
+        self.keys = None
+        self.images = None
+
+        self.setResults(respath)
+        self.setImages(imgpath)
+
+
+    def checkpath(self, path):
+        if path is not None and path != "":
+            if path[0] == "~":
+                path = os.path.expanduser(path)
+            if os.path.exists(path):
+                return True
+        return False
+
+    def setResults(self, respath):
+        if self.checkpath(respath):
+            self.results = Results(respath)
+            self.keys = self.results.keys
+
+    def setImages(self, imgpath):
+        if self.checkpath(imgpath):
+            images = self._getImages(imgpath)
+            if len(images) > 0:
+                self.images = images
+                self.current = 0
+                self.maxindex = len(images)
+
+
+    def _getImages(self, imgpath):
+        images = []
+        for (dirpath, dirnames, filenames) in os.walk(imgpath):
+            for filename in filenames:
+                if os.path.splitext(filename)[1] == ".png":
+                    images.append(os.path.join(dirpath, filename))
+        return images
+
+
+    def getImageData(self):
+        if self.current is not None:
+            frame = self.results.getFrameFromImgPath(
+                self.images[self.current])
+            imgdata = self.results.get(**frame)
+            if len(imgdata) == 1:
+                imgdata = imgdata[0]
+            elif len(imgdata) == 0: #DB doesn't contain requested row
+                imgdata = None
+            else:
+                raise ValueError("Multiple Result objects returned."+
+                             "Please specify unique Frame identifiers")
+        else:
+            return None
+
+        return imgdata
+
+    def updateImageData(self, what):
+        frame = self.results.getFrameFromImgPath(
+            self.images[self.current])
+        try:
+            self.results.update(what, **frame)
+        except:
+            pass
+
+    def getImage(self):
+        if self.images is not None:
+            return self.images[self.current]
+        return None
+
+    def getNext(self):
+        if self.current == None:
+            return None
+        elif self.current == self.maxindex-1:
+            return self.current
+        else:
+            self.current += 1
+
+    def getPrevious(self):
+        if self.current == None:
+            return None
+        elif self.current == 0:
+            return self.current
+        else:
+            self.current -= 1
+
+        
+
+class ImageChecker(Tk):
+    def __init__(self):
+        Tk.__init__(self)
+        self.geometry(utils.centerWindow(self, 1100, 600))
+        self.title("Trail Sorter")
+
+        self.respath = "~/Desktop"
+        self.imgpath = "~/Desktop"
+              
+        self.data = Data()
+
+        self.leftframe = LeftFrame(self)
+        self.rightframe = RightFrame(self)
+
+        self.initGUI()
+
+    def initGUI(self):
+        self.initImages()
+        self.initImageData()
+        self.update()
+
+    def initImageData(self):
+        path = tkFileDialog.askdirectory(parent=self,
+                            title="Please select results folder...",
+                            initialdir=self.respath)
+        self.data.setResults(path)
+
+    def initImages(self):
+        path = tkFileDialog.askdirectory(parent=self,
+                            title="Please select image folder...",
+                            initialdir=self.imgpath)
+        self.data.setImages(path)
+
+    def update(self):
+        self.leftframe.update()
+        self.rightframe.update()
+ 
+        
+def run():
+    app = ImageChecker()
+    app.mainloop()

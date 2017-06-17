@@ -1,0 +1,135 @@
+################################
+Instantiation times differences for 1 000 000 instantiations
+################################
+                     seconds
+fromCoords:              87.586029768
+fromIterableCoords:      87.3993070126
+with persisting Points:  87.8376510143
+without Points:          88.4286339283
+
+
+################################
+Difference between table related lookup and Point related lookup
+No SQL SELECT performed, just direct lookup over orm.
+Remember that all line properties such as slope, intercept, a, b, c
+are table lookup properties.
+1 mil. calculations
+################################
+                     seconds
+Point:            0.548620939255
+Table:            1.04073786736
+diff:             0.492116928101
+speedup:          1.89700719183
+
+
+################################
+Various line manipulation strategies. Moving the line from the original
+P1(x1, y1) P2(x2, y2) to:
+1.  P1 ( 1, y1 )  P2 ( x2, y2 )
+2.  P1 ( 1,  1 )  P2 ( x2, y2 )
+3.  P1 ( 1, y1 )  P2 ( 1 , y2 )
+4.  P1 ( 1,  1 )  P2 ( 1 , y2 )
+5.  P1 ( 1,  1 )  P2 ( 1 , 1  )
+by using:
+A. line single coordinate property setters (x1, y1, x2, y2)
+B. line move method
+*C. point instances move method
+*D. point instances
+
+special test cases marked with * are unsafe because data is not
+persisted torwards the DB unless some other method that calls
+_initFrame and _initCCD is accidentally called. Persisting the data
+explicitly, however, makes these methods execute within 0.1sec of the
+offered safe methods.
+
+Speedup is compared to respective coordinate change operation of
+the method bellow. So B1 is x times faster/slower than A1
+
+1 000 000 calculations.
+################################
+         seconds           speedup
+                               B                              
+..............................................................
+1.     59.8979189396    1.12538478893
+2.     59.0911221504    1.73903736074
+3.     59.3265898228    1.73089653225
+4.     58.6754071712    2.58628145329
+5.     55.7745070457    3.39600850186
+                               A                              
+..............................................................
+1.     53.2243900299
+2.     104.164718866
+3.     103.677100182
+4.     154.912876844
+5.     203.413841963
+                              C*                              
+..............................................................
+1.           ---    
+2.     2.76758909225    2.22533358144
+3.           ---    
+4.     54.7518570423    5.6095427034   ---> special case, mixed move and line instance 
+4a.     6.63389992714    1.47130421638  ---> special case, mixed move and point instance 
+5.     5.86194300652    2.10542616597
+                              D*                              
+..............................................................
+1.     3.35869312286
+2.     6.15880894661
+3.     6.7232530117
+4.     9.76048493385
+5.     12.3418881893
+
+
+
+################################
+Difference between point calculations for collections and individual
+coordinates. Individual coordinates were tested over __call__ and
+directly over getx.
+
+10 mil. calculations
+###############################
+                     seconds
+                          __call__                            
+..............................................................
+individual:       48.8265969753
+map loop:         2.79466795921
+diff:             46.0319290161
+speedup:          17.471341028
+                            getx                              
+..............................................................
+getx:             45.939494133
+map loop:         2.76626706123
+diff:             43.1732270718
+speedup:          16.6070350823
+
+
+################################
+When Does It Pay Off To Use Collections over individual.
+
+Table shows 100 time measuraments averaged. Each measurament calculated
+the y value of the line for N elements both by iterating through the
+N x coordinates, or by maping over N x coordinates.
+
+Results are sort of biased torwards map, because creation of the list
+was not timed as calculation. It doesn't actually pay-off to create a
+list containing 1 element dynamically, only when the list was already
+created as part of an outside code is the difference visible.
+
+In any case avoiding calculations through iteration pays off due to the
+large sqlalchemy lookup overhead costs.
+
+(Table in miliseconds)
+###############################
+N     Indiv.    map       Diff     Sp.Up   
+1     0.015974  0.0093778 0.0066   1.7034  
+2     0.0066757 0.0053247 0.00135  1.2537  
+3     0.0083447 0.0050068 0.00334  1.6667  
+4     0.010649  0.0053247 0.00532  2.0     
+5     0.012636  0.0050068 0.00763  2.5238  
+6     0.015338  0.0053247 0.01     2.8806  
+7     0.017325  0.005722  0.0116   3.0278  
+8     0.01963   0.0060399 0.0136   3.25    
+9     0.022014  0.0060399 0.016    3.6447  
+10    0.024001  0.0063578 0.0176   3.775   
+100   0.22904   0.022968  0.206    9.9723  
+1000  2.3847    0.21164   2.17     11.268  
+10000 20.42     1.339     19.1     15.25 

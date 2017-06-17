@@ -1,0 +1,34 @@
+import sqlalchemy as sa
+from sqlalchemy.orm import relationship
+print relationship
+from .base import Base
+
+frame_frametimes_t = sa.Table(
+    "frame_frametimes", Base.metadata,
+    sa.Column('frame_id', sa.Integer, sa.ForeignKey('frames.id'), nullable=False),
+    sa.Column('frametime_id', sa.Integer, sa.ForeignKey('frametimes.id'), nullable=False),
+)
+
+class FrameTime(Base):
+    __tablename__ = "frametimes"
+    id = sa.Column(sa.Integer, primary_key=True)
+
+    frames = relationship('Frame', secondary=frame_frametimes_t, back_populates="frametimes")
+
+class Frame(Base):
+    __tablename__ = "frames"
+    id = sa.Column(sa.Integer, primary_key=True)
+
+    run = sa.Column(sa.Integer)
+    camcol = sa.Column(sa.Integer)
+    filter = sa.Column(sa.String)
+    field = sa.Column(sa.Integer)
+
+    lines = relationship("Line", back_populates="frame")
+    frametimes = relationship("FrameTime", secondary=frame_frametimes_t, back_populates='frames')
+
+    def __init__(self, run, camcol, filter, field):
+        self.run = run
+        self.camcol = camcol
+        self.filter = filter
+        self.field = field
