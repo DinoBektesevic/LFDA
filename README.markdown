@@ -6,7 +6,7 @@ There is no specific installation required. The code requires sevaral libraries 
 
 As the code is currently actively under development it is subject to change without notification.
 
-## Requirements:
+### Requirements:
 
 * Python 2.7
 * OpenCV 2.4.9
@@ -67,13 +67,11 @@ foo.params_bright["debug"] = True
 foo.params_removestars["filter_caps"]["i"] = 20 
 ```
 
-See the DetectTrails class help string, detecttrails module help string or the paper linked at the top for full list of execution/detection parameters and their explanation.
+See the `DetectTrails` class help string, `detecttrails` module help string or the paper linked at the top for full list of execution/detection parameters and their explanation.
 
-Results are outputted to a file provided by the filepath `results`. Results file is a CSV file in which the detected parameters, if a line is gound, are stored in the following order:
+Results are outputted to a file provided by the filepath `results`. By default it is set to `results.txt`. Results file is a CSV file in which the detected parameters, if a line is found, are stored in the following order:
 
 ```run field camcol filter tai crpix1 crpix2 crval1 crval2 cd1_1 cd1_2 cd2_1 cd2_2 x1 x2 y1 y2```
-
-It is defaultly set to `results.txt`
 
 All errors are forcefully silenced. This is done not to interrupt an entire batch processing session because of a corrupt file or a bug. Errors are logged in a file `errors`, defaultly set to `errors.txt`. Each error is a 3 stack deep traceback printed in the following format:                
 
@@ -83,7 +81,7 @@ TRACEBACK (3 stacks deep)
 Error message of 1st stack.
 ```
 
-## Debug mode
+#### Debug mode
 
 A special mode in which this class can operate is the debug mode that can be selected by:
 
@@ -131,7 +129,7 @@ cp *.txt /home/fermi/$user/run_results/$JOB_ID/
 
 The module is highly flexible and can be easily adapted to fit various different execution environments. It has several different usage cases depending to enable very high execution specification. 
 
-## Simple use case
+### Simple use case
 
 The simplest one is just specifying the number of jobs you want. Jobs will then take all the runs found in runlist.par file with rerun 301 and create jobs to process them. Be carefull about processing too many runs in a single job because WALLCLOCK or CPUTIME can expire.
 
@@ -152,7 +150,7 @@ The simplest one is just specifying the number of jobs you want. Jobs will then 
 
 User will be notified about all important parameters that were set. Notice that the save path, queue, wallclock, ppn and cputime are set by default. Also notice that we specified 500 jobs to be created but 765 jobs were created. This is intentional. Jobs looks for the next larger whole number divisor divisor to split the jobs between.
 
-## Specifying runs
+### Specifying runs
 
 Specifying certain runs by hand is possible by sending a list of runs of interes:
 
@@ -169,7 +167,7 @@ Specifying certain runs by hand is possible by sending a list of runs of interes
             Path:      /home/user/Desktop/.../jobs
 ```
 
-## Selecting processing data
+### Selecting processing data
 
 Specifying aditional keyword arguments to Jobs class helps you utilize DetectTrails class run options. Sent kwargs are applied globaly across every job. It's not possible to specify separate kwargs for each job. 
 
@@ -200,7 +198,7 @@ python -c "import detect_trails as dt;
 
 See help on DetectTrails class for a list of all options.
 
-## Specifying detection parameters
+### Specifying detection parameters
 
 To further fine tune your job behaviour it's possible to change the default execution command to supply additional execution parameters. By default, the keyword argument `command` is set to:
 
