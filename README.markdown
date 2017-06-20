@@ -8,10 +8,10 @@ As the code is currently actively under development it is subject to change with
 
 ## Requirements:
 
-Python 2.7
-OpenCV 2.4.9
-NumPy 1.12.1
-Fitsio 0.9.7
+* Python 2.7
+* OpenCV 2.4.9
+* NumPy 1.12.1
+* Fitsio 0.9.7
 
 # Running the code
 
