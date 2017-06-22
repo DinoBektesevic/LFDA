@@ -1,11 +1,22 @@
+# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+
 """
 Package:
     detecttrails
+Purpose:
+    Linear feature detection algorithm for big data long linear feature
+    extraction. See https://arxiv.org/abs/1612.04748.
 Modules:
-    sdss          --isn't explicitly imported
-    detect_trails --DetectTrails class is explicitly imported
-    process_field --isn't explicitly imported
-    
+    sdss --  Erin Sheldon's astronomical utilities esutil mixed with
+             Erin Sheldon's SDSS python utils. Bundled with LFDA because
+             only minor functionality is used. See:
+             https://github.com/esheldon/esutil
+             https://github.com/esheldon/sdsspy/
+    detect_trails 
+    process_field
+
+
 
   Classes:
 -------------
@@ -124,7 +135,7 @@ DetectTrails(run= , camcol={1-6}, field={all], filter={ugriz})
             "contoursMethod": cv2.CHAIN_APPROX_NONE
             "minAreaRectMinLen": 1
             "lwTresh": 5
-            "houghMethod": 1, #CV_HOUGH_STANDARD
+            "houghMethod": 1, #as many counts as you like. Hard to predict.
             "nlinesInSet": 3,
             "thetaTresh": 0.15
             "linesetTresh": 0.15,
@@ -179,6 +190,8 @@ process_field(results, errors, run, camcol, filter, field,
      photoObj-run-camcol-field.fits
 """
 
+
+
 import sys as _sys
 
 try:
@@ -190,3 +203,12 @@ except:
     _sys.stderr.write("DetectTrails not imported.\n")
     
 del removestars, processfield, sdss, detecttrails
+
+__author__ = "Dino Bektesevic"
+__copyright__ = "Copyright 2017, Linear Feature Detection Algorithm (LFDA)"
+__credits__ = ["Dino Bektesevic"]
+__license__ = "GPL3"
+__version__ = "1.0.1"
+__maintainer__ = "Dino Bektesevic"
+__email__ = "dino@iszd.hr"
+__status__ = "Development"

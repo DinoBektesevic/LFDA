@@ -1,11 +1,33 @@
+# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+
+"""
+Contains convenience class DetectTrails that eases usage. Through it
+users can select, process and SDSS frame, change processing parameters
+and capture results and errors in a OO way, interactively or in a batch
+processing manner.
+
+  Classes
+----------------
+DetectTrails - process a frame, or a selection of frames by selecting them
+               through their id numbers. Change processing parameters.
+
+  Functions
+----------------
+process_field - handles results/errors outputting and invokes processing
+                steps in correct order.
+"""
+
 from removestars import remove_stars
 from processfield import process_field_bright, process_field_dim
-import fitsio
 from sdss import files
 
 import os
 import traceback
 import numpy as _np
+
+
+import fitsio
 import cv2
 from cv2 import RETR_LIST, RETR_EXTERNAL, RETR_CCOMP, RETR_TREE
 from cv2 import (CHAIN_APPROX_NONE , CHAIN_APPROX_SIMPLE,
@@ -158,7 +180,7 @@ class DetectTrails:
             "contoursMode": RETR_LIST, #CV_RETR_EXTERNAL
             "contoursMethod": CHAIN_APPROX_NONE, #CV_CHAIN_APPROX_SIMPLE
             "minAreaRectMinLen": 1,
-            "houghMethod": 1, #CV_HOUGH_STANDARD
+            "houghMethod": 1, #As many as you want. 
             "nlinesInSet": 3,
             "lineSetTresh": 0.15,
             "dro": 25,
@@ -169,7 +191,7 @@ class DetectTrails:
             "defaultxy": 10,
             "maxxy": 60,
             "filter_caps": {'u': 22.0, 'g': 22.2,'r': 22.2, 'i':21.3,
-                            'z': 20.5},
+                            'z': 20.5}, #SDSS 95% completion rates.
             "magcount": 1,
             "maxmagdiff": 2
             }            
@@ -337,6 +359,17 @@ class DetectTrails:
                           self.params_removestars)
             #print files.filename('frame', self._run, self._camcol, filter=self._filter, field=self._field)
 
-#        self.results.close()
+        #intentionally commented out for runs on large batches, not time
+        #wasted on opening and closing the file.
+        #requires to close the file manually.
+#        self.results.close() 
 
 
+__author__ = "Dino Bektesevic"
+__copyright__ = "Copyright 2017, Linear Feature Detection Algorithm (LFDA)"
+__credits__ = ["Dino Bektesevic"]
+__license__ = "GPL3"
+__version__ = "1.0.1"
+__maintainer__ = "Dino Bektesevic"
+__email__ = "dino@iszd.hr"
+__status__ = "Development"

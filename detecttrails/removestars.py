@@ -1,3 +1,18 @@
+# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+
+"""
+Handles reading of photoObj files and removal of objects from images.
+
+  Functions:
+--------------
+photoObj_read - reads the header of photoObj file
+remove_stars - provided an image and photoObj file id returns an image
+               with objects, found in photoObj, masked out.
+"""
+
+
+
 import numpy as np
 import csv
 import os
@@ -6,45 +21,6 @@ from sdss import astrom
 from sdss import files
 import math
 
-def CSV_read(path_to_CAS):
-    """     ***DEPRECATED***
-    Defines a function that reads CSV file given by
-    path into a list of dictionaries. Function is deprecated in
-    favor of photoObjRead.
-    Returned list is arranged as
-        {[ra:, dec:, u:, g:, r:, i:, z:],
-            ...}.
-    """  
-    labels=['ra', 'de', 'u', 'g', 'r', 'i', 'z']
-    read = csv.DictReader(open(path_to_CAS), labels,
-                          delimiter=',', quotechar='"')
-    lines = list()
-    for line in read:
-        lines.append(line)
-    return lines
-
-def remove_stars_CSV(img, _run, _camcol, _filter, _field):
-    """     ***DEPRECATED***
-    Function that removes all stars found in coordinates file
-    from a given image. Requires the use of edited sdssFileTypes.par
-    located in detect_trails/sdss/share
-    Function was deprecated in favor of RemoveStars."""
-    Coord = CSVRead(files.filename('CSVCoord', run=_run,
-                                          camcol=_camcol, field=_field))
-    Coord = Coord[1:]
-    conv = astrom.Astrom(run=_run, camcol=_camcol)
-           
-    for star in Coord:
-        try:
-            if (float(star[_filter])<23):
-                ra = float(star['ra'])
-                de = float(star['de'])
-                xy = conv.eq2pix(_field, _filter, ra, de)
-                x, y=xy[0], xy[1]
-                img[x-30:x+30, y-30:y+30].fill(0.0)
-        except ValueError as err:
-            pass
-    return img
 
 
 def photoObj_read(path_to_photoOBJ):
@@ -122,20 +98,6 @@ def photoObj_read(path_to_photoOBJ):
             
     return rowf, colf, psfMagf, petro90f, objctype, types, nObserve, nDetect
 
-
-
-def fill(array, tuple_val):
-    """
-    DEPRECATED
-    Used to colorize the image for debugging purposes.
-    """
-    if np.shape(array)[-1] != len(tuple_val):
-        raise ValueError("Tuple len is not the same as array element len")
-
-    for i in xrange(len(array)):
-        for j in xrange(len(array[i])):
-            array[i,j] = tuple_val
-    return array
         
 
 def remove_stars(img, _run, _camcol, _filter, _field, defaultxy, filter_caps,
@@ -229,3 +191,13 @@ def remove_stars(img, _run, _camcol, _filter, _field, defaultxy, filter_caps,
                     img[x-dxy:x+dxy, y-dxy:y+dxy].fill(0.0)
     
     return img       
+
+
+__author__ = "Dino Bektesevic"
+__copyright__ = "Copyright 2017, Linear Feature Detection Algorithm (LFDA)"
+__credits__ = ["Dino Bektesevic"]
+__license__ = "GPL3"
+__version__ = "1.0.1"
+__maintainer__ = "Dino Bektesevic"
+__email__ = "dino@iszd.hr"
+__status__ = "Development"

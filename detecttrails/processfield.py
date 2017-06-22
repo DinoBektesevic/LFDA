@@ -1,16 +1,25 @@
 # -*- coding: utf-8 -*-
+#!/usr/bin/env python
+
+"""
+Provides functions for image processing, detection confirmation and
+debug image outputting.
+
+  Functions:
+--------------
+_check_theta - check the detected line's theta coordinate correlation
+_draw_lines - used in detecttrails debug mode to output images
+_fit_minAreaRectangles - find and return image with minimal area rectangles
+                         fitted to interesting objects.
+_dictify_hough - format results in a CSV printable manner
+process_field_bright - tries to find linear features with less processing
+                       time.
+process_field_dim - finds dimmer trails. Takes more time.
+"""
+
+
 import cv2
 import numpy as np
-from skimage import io, exposure, img_as_uint, img_as_float
-
-#do NOT use 'path' as a variable in program,
-#it's a dummy test variable for saving images
-#consider using sdss.files.filename() instead
-##pathBright = '/home/fermi/dbektesevic/run_results/'
-##pathDim = '/home/fermi/dbektesevic/run_results/'
-pathBright = '/home/dino/Desktop/LFDS/'
-pathDim =  '/home/dino/Desktop/LFDS/'
-
 
 def _check_theta(hough1, hough2, navg, dro, thetaTresh, lineSetTresh, debug):
         """
@@ -112,8 +121,8 @@ def _check_theta(hough1, hough2, navg, dro, thetaTresh, lineSetTresh, debug):
             if debug: print "Lineset tresh test:    FAILED"
             return True
 
-def _draw_lines(hough, image, nlines, name, path=pathDim,
-                compression=0, color=(255,0,0)):
+def _draw_lines(hough, image, nlines, name, compression=0,
+                color=(255,0,0)):
     """
     For debuging purposes, draw hough lines on a given image and save
     as png.
@@ -133,8 +142,6 @@ def _draw_lines(hough, image, nlines, name, path=pathDim,
             _just_ the name of the file. No ".png".
 
     Optional:
-        path:
-            pathDim is set by default. Send as kwarg to change.
         compression:
             cv2.IMWRITE_PNG_COMPRESSION parameter, int from 0 to 9.
             A higher value means a smaller size and longer compression
@@ -161,7 +168,7 @@ def _draw_lines(hough, image, nlines, name, path=pathDim,
         except:
             pass
 
-    cv2.imwrite(path+name+".png", draw_im,
+    cv2.imwrite(name+".png", draw_im,
                 [cv2.IMWRITE_PNG_COMPRESSION, compression])
             
 def _fit_minAreaRect(img, contoursMode, contoursMethod, minAreaRectMinLen,
@@ -230,8 +237,6 @@ def _dictify_hough(shape,houghVals):
     x2 = int(x0 + (n_x+n_y)*np.sin(theta))
     y2 = int(y0 - (n_x+n_y)*np.cos(theta))
 
-    #OMFG DINO!!!!! KOJA JBN GREŠKA; SPREMAŠ Y0 A NE Y1 TO NEIDE!
-    #print {"x1":x1, "y1":y0, "x2":x2, "y2":y2}
     return {"x1":x1, "y1":y1, "x2":x2, "y2":y2}
 
 
@@ -276,14 +281,14 @@ def process_field_bright(img, lwTresh, thetaTresh, dilateKernel,
     equ = cv2.equalizeHist(gray_image)
 
     if debug:
-        cv2.imwrite(pathBright+"1equBRIGHT.png", equ,
+        cv2.imwrite("1equBRIGHT.png", equ,
                     [cv2.IMWRITE_PNG_COMPRESSION, 3])
         print "BRIGHT: saving EQU with removed stars"
     
     equ = cv2.dilate(equ, dilateKernel)
 
     if debug:
-            cv2.imwrite(pathBright+"2dilateBRIGHT.png", equ,
+            cv2.imwrite("2dilateBRIGHT.png", equ,
                         [cv2.IMWRITE_PNG_COMPRESSION, 3])
             print "BRIGHT: saving dilated image."    
 
@@ -294,7 +299,7 @@ def process_field_bright(img, lwTresh, thetaTresh, dilateKernel,
                                           debug)
     
     if debug:        
-        cv2.imwrite(pathBright+"3contoursBRIGHT.png", box_img,
+        cv2.imwrite("3contoursBRIGHT.png", box_img,
                     [cv2.IMWRITE_PNG_COMPRESSION, 3])
         print "BRIGHT: saving contours"
 
@@ -304,9 +309,9 @@ def process_field_bright(img, lwTresh, thetaTresh, dilateKernel,
 
         if debug:
             _draw_lines(equhough, equ, nlinesInSet,
-                        "5equhoughBRIGHT", path=pathBright)
+                        "5equhoughBRIGHT")
             _draw_lines(boxhough, box_img,  nlinesInSet,
-                        "4boxhoughBRIGHT", path=pathBright)
+                        "4boxhoughBRIGHT")
             print "BRIGHT!"
         
         if _check_theta(equhough, boxhough, nlinesInSet, dro,
@@ -362,21 +367,21 @@ def process_field_dim(img, minFlux, addFlux, lwTresh, thetaTresh,
     
     if debug:
         print "DIM: saving EQU with stars removed"
-        cv2.imwrite(pathDim+"6equDIM.png", equ,
+        cv2.imwrite("6equDIM.png", equ,
                     [cv2.IMWRITE_PNG_COMPRESSION, 0])
     
     opening = cv2.erode(equ, erodeKernel)
     
     if debug:
         print "DIM: saving eroded EQU with stars removed"
-        cv2.imwrite(pathDim+'7erodedDIM.png', opening,
+        cv2.imwrite('7erodedDIM.png', opening,
                     [cv2.IMWRITE_PNG_COMPRESSION, 0])
     
     equ = cv2.dilate(opening, dilateKernel)
     
     if debug:
         print "DIM: saving dilated eroded EQU with stars removed"
-        cv2.imwrite(pathDim+'8openedDIM.png', equ,
+        cv2.imwrite('8openedDIM.png', equ,
                     [cv2.IMWRITE_PNG_COMPRESSION, 0])
 
     detection, box_img = _fit_minAreaRect(equ, contoursMode,
@@ -384,7 +389,7 @@ def process_field_dim(img, minFlux, addFlux, lwTresh, thetaTresh,
                                           minAreaRectMinLen, lwTresh,
                                           debug)       
     if debug:
-        cv2.imwrite(pathDim+"9contoursDIM.png", box_img,
+        cv2.imwrite("9contoursDIM.png", box_img,
                     [cv2.IMWRITE_PNG_COMPRESSION, 0])
         print "DIM: saveamo konture"       
 
@@ -408,3 +413,13 @@ def process_field_dim(img, minFlux, addFlux, lwTresh, thetaTresh,
     else:
         if debug: print "DIM: FALSE AT NO RECTANGLES MATCHING THE CONDITIONS FOUND!"
         return (False, None)
+
+
+__author__ = "Dino Bektesevic"
+__copyright__ = "Copyright 2017, Linear Feature Detection Algorithm (LFDA)"
+__credits__ = ["Dino Bektesevic"]
+__license__ = "GPL3"
+__version__ = "1.0.1"
+__maintainer__ = "Dino Bektesevic"
+__email__ = "dino@iszd.hr"
+__status__ = "Development"

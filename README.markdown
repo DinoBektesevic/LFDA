@@ -12,6 +12,9 @@ As the code is currently actively under development it is subject to change with
 * OpenCV 2.4.9
 * NumPy 1.12.1
 * Fitsio 0.9.7
+* parts of Erin Sheldon's esutil and sdsspy utilities are bundled with the provided code. Parts of code were slightly altered.
+  * https://github.com/esheldon/sdsspy/
+  * https://github.com/esheldon/esutil
 
 # Running the code
 
@@ -69,7 +72,7 @@ foo.params_removestars["filter_caps"]["i"] = 20
 
 See the `DetectTrails` class help string, `detecttrails` module help string or the paper linked at the top for full list of execution/detection parameters and their explanation.
 
-Results are outputted to a file provided by the filepath `results`. By default it is set to `results.txt`. Results file is a CSV file in which the detected parameters, if a line is found, are stored in the following order:
+Results are outputted to a file provided by the filepath `results`, defaultly set to `results.txt`. Results file is a CSV file in which the detected parameters. To find out what the parameters mean see the SDSS frame datamodel: https://data.sdss.org/datamodel/files/BOSS_PHOTOOBJ/frames/RERUN/RUN/CAMCOL/frame.html. Results are stored in the following format:
 
 ```run field camcol filter tai crpix1 crpix2 crval1 crval2 cd1_1 cd1_2 cd2_1 cd2_2 x1 x2 y1 y2```
 
@@ -234,10 +237,24 @@ Again, the actual written command in the job#.dqs file would not look as user fr
 ```
 
 This complication is here because the command has to be sent as a string therefore the quotation marks used inside should not escape the outsidemost quotations. Outtermost declare a python string which becomes the command attribute of Jobs class. Inner double quotations enclose the string that will be executed by `python -c` command. Innermost escaped single quotations designate a string that will be interpreted as an argument to the DetectTrails parameters. General usefull guidelines:
+
 1. the outter-most quotation as single '' marks
 2. everything past "-c" flag in double quotation marks ""
 3. further quotation marks should be escaped single quotations.
 4. a EXPLICIT newline character should ALWAYS be at the end.    
+
+A much more user friendly approach is to use Python's multiline comments.
+
+```python
+>>> newcommand = """
+python -c "import detectrails as dt;
+x = dt . DetectTrails($);
+x.params_bright[’debug’] = True;
+x.process"
+"""
+>>> jobs = cj . Jobs (2, runs=runs, camcol=1, filter="i", command=newcommand )
+>>> jobs.create()
+```
 
 To see all availible parameters and arguments to the Jobs class see its help string. 
 

@@ -1,11 +1,38 @@
-import os
-from detecttrails.sdss import files
-import numpy as np
-from results import Results
+# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+
+"""
+Create jobs for large batch processing on QSUB systems. Output customized
+.dqs files for large processing batches through a simpler OO interface.
+
+  Functions
+---------------
+expandpath - expand path as an absolute, relative or relative to /home
+             depending on the existence of "~".
+
+
+  Classes
+---------------
+Jobs - convenience class to set processing parameters, select data
+       to be processed and setup the processing environment.
+"""
 import writer
+from detecttrails.sdss import files
 
-from gui.utils import expandpath
+import os
+import numpy as np
 
+
+def expandpath(path):
+    if path is not None and path != "":
+        if path[0] == "~":
+            path = os.path.expanduser(path)
+        if os.path.exists(path):
+            path = os.path.abspath(path)
+            return (True, path)
+    return (False, None)
+
+    
 class Jobs:
     """
     Class that holds all the important functions for making Qsub jobs.
@@ -40,12 +67,6 @@ class Jobs:
             set jobs maximum time allowed to be running on a CPU in
             hours.
             default: 48:00:00
-        pernode:
-                        **DEPRECATED**
-            if this option is set to True, will read a lst_lnk file
-            and try to execute each job on the node its files are
-            located on. If pernode is False, QSUB determines which
-            nodes to execute on.
         ppn:
             maximum allowed processors per node. 
             Default: 3
@@ -62,15 +83,12 @@ class Jobs:
             DetectTrails class, see it for more info, or see this
             module's help. Currently supports: camcol and filter.
             Sent in camcol will be applied to all runs in the "runs"
-            kwarg. The only true way of generating jobs per frames is
-            to send in Results instance as runs:        
+            kwarg.
         runs:
             if runs are not specified, all sdss runs found in
               runlist.par file will be used.
             if runs is a list of runs only those runs will be sorted
-              into jobs
-            if runs is a Results class instance, only those frames
-              will be sorted into jobs.
+              into jobs.
 
     In "path" a folder "jobs" will be created, if it doesn't exist
     already. In "jobs" folder, files "job#.dqs" will be stored. 
@@ -84,7 +102,7 @@ class Jobs:
      methods
     -----------
     _runlstAll():
-        don't use this. It just reads in runslit.par and creates jobs
+        It reads in runslit.par and creates jobs
         for every run in there that has a rerun set to 301.
     _createBatch(runlst):
         creates a batch.sh file that starts all the qsub jobs at once.
@@ -105,16 +123,14 @@ class Jobs:
 
                                                         
     def __init__(self, n, runs=None, queue="standard", wallclock="24:00:00", 
-                 ppn="3", cputime="48:00:00", pernode = False, 
-                 template_path = None, save_path=None,
+                 ppn="3", cputime="48:00:00", template_path = None,
+                 save_path=None,
                  command = 'python -c "import detecttrails as dt;' +\
-                                    ' dt.DetectTrails($).process()"\n',
-                 **kwargs):
+                ' dt.DetectTrails($).process()"\n', **kwargs):
 
         self.n = n
         self.wallclock = wallclock
         self.cputime = cputime
-        self.pernode = pernode
 
 
         curpath = os.path.abspath(os.path.curdir)
@@ -161,7 +177,7 @@ class Jobs:
 
     def makeRunlst(self, runs):
         """
-        Create a runlst from a list of runs or Results instance.
+        Create a runlst from a list of runs.
         Recieves a list of runs: [N1,N2,N3,N4,N5...] and returns
         a runlst:
         [   (N1, N2...N( n_runs / n_jobs)) 0
@@ -186,10 +202,6 @@ class Jobs:
         nruns = int(len(runs)/self.n)
         runlst = [runs[i:i+nruns] for i in range(0, len(runs), nruns)]
         return runlst
-
-    def makeRunlstResults(self, results):
-        allres = results.get()
-        return self.makeRunlst(allres)
 
     def _createBatch(self, runlst):
         """
@@ -237,12 +249,8 @@ class Jobs:
         if all(
                 ["camcol" not in kwargs,
                 "filter" not in kwargs,
-                not isinstance(self.runs, Results)]
                ):
             self.pick="Run"
-
-        if isinstance(self.runs, Results):
-            self.pick="Results"
 
     def create(self):
         """
@@ -256,10 +264,6 @@ class Jobs:
             print "There are no runs to create jobs from. Creating jobs"+\
                   " for all runs in runlist.par file."
             runlst = self._runlstAll()
-            writer.writeDqs(self, runlst)
-
-        elif isinstance(self.runs, Results):
-            runlst =  self.makeRunlstResults(self.runs)
             writer.writeDqs(self, runlst)
 
         elif self.runs:
@@ -282,22 +286,14 @@ class Jobs:
              )
     
         self._createBatch(runlst)
-    
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                
+__author__ = "Dino Bektesevic"
+__copyright__ = "Copyright 2017, Linear Feature Detection Algorithm (LFDA)"
+__credits__ = ["Dino Bektesevic"]
+__license__ = "GPL3"
+__version__ = "1.0.1"
+__maintainer__ = "Dino Bektesevic"
+__email__ = "dino@iszd.hr"
+__status__ = "Development"

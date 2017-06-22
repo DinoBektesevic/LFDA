@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+
+
 """
 createjobs module is used to create .dqs files necessary to run a job
 on QSUB system. Importing this module will only import Jobs class.
@@ -179,45 +183,16 @@ Edit them directly, i.e. the save path for results is given by:
 
     To see the list of all changable execution parameters of
     DetectTrails class see help(detecttrails).
-    
-3) By sending in Results object. Former approach covers most basics
-   about how to get the most out of DetectTrails class on QSUB.
-   However it's still impossible to create a job per frames. Sollution
-   for this problem is to instantiate a Results object, which is a 
-   container of  Result objects, and send it to Jobs class. Read docs
-   of Results to see how to instatiate that object. 
-   
-        >>> import results as res
-        >>> r = res.Results(folderpath="/home/user/Desktop/res1/res")
-        >>> jobs = cj.Jobs(5, runs=r)
-        >>> jobs.create()
-        Creating: 
-            6 jobs with 1372 runs per job 
-        Queue:     standard 
-        Wallclock: 24:00:00 
-        Cputime:   48:00:00 
-        Ppn:       3 
-        Path:      /home/user/Desktop/bitbucket/refactor/createjobs/jobs
-   
-   This time it's not runs you're executing but frames, therefore you
-   can let a larger number of them per job. Average times of runs are
-   around 6h while average processing a frame is 0.2s. I.e. command 
-   that will get executed now is:
-
-	python -c "import detect_trails as dt; 
-               dt.DetectTrails(run=125,camcol=1,filter=i,
-                               field=69).process()"
-	
 """
 
-import sys as _sys
 
 from createjobs import Jobs
 
-#try:
-#    from createjobs import Jobs
-#    from createjobs import writer as _writer
-#except:
-#    _sys.stderr.write("Jobs class was not loaded\n.")
-
-#del writer, createjobs
+__author__ = "Dino Bektesevic"
+__copyright__ = "Copyright 2017, Linear Feature Detection Algorithm (LFDA)"
+__credits__ = ["Dino Bektesevic"]
+__license__ = "GPL3"
+__version__ = "1.0.1"
+__maintainer__ = "Dino Bektesevic"
+__email__ = "dino@iszd.hr"
+__status__ = "Development"
