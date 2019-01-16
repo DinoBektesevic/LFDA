@@ -1,3 +1,7 @@
+# NOT DEVELOPED
+
+See the updated Python3+ and OpenCv3+ compatible replacement to this module: https://github.com/DinoBektesevic/lfd
+
 Computer vision algorithms are powerful tools in astronomical image analyses, especially when automation of object detection and extraction is required. Modern object detection algorithms in astronomy are oriented towards detection of stars and galaxies, ignoring completely detection of existing linear features. With the emergence of wide-field sky surveys, linear features attract scientific interest as possible trails of fast flybys of near-Earth asteroids and meteors. In this work we describe a new linear feature detection algorithm designed specifically for implementation in Big Data astronomy. The algorithm combines a series of algorithmic steps that first remove other objects (stars, galaxies) from the image and then enhance the line to enable more efficient line detection with the Hough algorithm. The rate of false positives is greatly reduced thanks to a step that replaces possible line segments with rectangles and then compares lines fitted to the rectangles with the lines obtained directly from the image. The speed of the algorithm and its applicability in astronomical surveys are also discussed. 
 
 # Installation
